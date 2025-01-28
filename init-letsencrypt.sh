@@ -4,6 +4,7 @@ domains=(api-realityzando.all.dev.br)
 rsa_key_size=4096
 data_path="./certbot"
 email="seu-email@example.com" # Altere para seu e-mail
+staging=0 # Defina como 1 se quiser testar primeiro
 
 if [ -d "$data_path" ]; then
   read -p "Certificados existentes encontrados. Continuar e substituir certificados existentes? (y/N) " decision
@@ -55,7 +56,7 @@ case "$email" in
 esac
 
 # Enable staging mode if needed
-if [ $staging != "0" ]; then staging_arg="--staging"; fi
+if [ "$staging" != "0" ]; then staging_arg="--staging"; fi
 
 docker-compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \

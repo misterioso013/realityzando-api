@@ -182,7 +182,7 @@ email="seu-email@example.com"
 3. Execute a configuração SSL:
 ```bash
 chmod +x init-letsencrypt.sh
-./init-letsencrypt.sh
+sudo ./init-letsencrypt.sh
 ```
 
 ### 4. Iniciando a Aplicação
