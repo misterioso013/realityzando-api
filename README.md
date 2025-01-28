@@ -10,6 +10,21 @@ API para obter informações dos participantes do BBB 25, incluindo status atuai
 - Informações básicas (nome, foto, profissão, idade, etc.)
 - Informações sobre duplas
 
+## Tecnologias Utilizadas
+
+- Node.js
+- TypeScript
+- Express
+- Puppeteer
+- PNPM
+
+## Requisitos
+
+- Node.js 18+
+- PNPM
+- Chrome/Chromium instalado (para o Puppeteer)
+- Docker e Docker Compose instalados
+
 ## Endpoints
 
 ### GET /participants
@@ -96,24 +111,6 @@ O servidor iniciará na porta 3000 por padrão. Você pode alterar a porta atrav
 - Os dados são atualizados automaticamente a cada 30 minutos
 - Você pode forçar uma atualização usando o endpoint `/participants/update`
 - Os dados são armazenados em um arquivo JSON local
-
-## Tecnologias Utilizadas
-
-- Node.js
-- TypeScript
-- Express
-- Puppeteer
-- PNPM
-
-## Requisitos
-
-- Node.js 18+
-- PNPM
-- Chrome/Chromium instalado (para o Puppeteer)
-
-## Licença
-
-MIT
 
 ## Instalação em Produção
 
