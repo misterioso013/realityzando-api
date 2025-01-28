@@ -156,8 +156,8 @@ sudo systemctl enable docker
 sudo systemctl start docker
 
 # Clone o repositório
-git clone seu-repositorio
-cd seu-repositorio
+git clone https://github.com/misterioso013/realityzando-api
+cd realityzando-api
 
 # Crie as pastas necessárias
 mkdir -p nginx/conf certbot/conf certbot/www
