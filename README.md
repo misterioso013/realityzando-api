@@ -115,85 +115,64 @@ O servidor iniciará na porta 3000 por padrão. Você pode alterar a porta atrav
 
 MIT
 
-## Configuração em Produção
+## Instalação em Produção
 
-Para executar em ambiente de produção, recomendamos usar Docker:
-
-### Usando Docker
-
-1. Construa a imagem:
-```bash
-docker build -t realityzando-api .
-```
-
-2. Execute o container:
-```bash
-docker run -p 3000:3000 --restart always -d realityzando-api
-```
-
-3. Visualize os logs:
-```bash
-# Listar containers em execução
-docker ps
-
-# Ver logs em tempo real
-docker logs -f [container-id]
-
-# Ver últimos 100 logs
-docker logs --tail 100 [container-id]
-```
-
-4. Atualizar a aplicação:
-```bash
-# Parar o container atual
-docker stop [container-id]
-
-# Remover o container antigo
-docker rm [container-id]
-
-# Construir nova imagem
-docker build -t realityzando-api .
-
-# Rodar novo container
-docker run -p 3000:3000 --restart always -d realityzando-api
-```
-
-### Dependências (apenas para execução sem Docker)
-
-Em sistemas Linux, se você optar por não usar Docker, precisará instalar algumas dependências para o Puppeteer:
+### 1. Instalação do Docker e Docker Compose
 
 ```bash
-# Ubuntu/Debian
-sudo apt-get update && sudo apt-get install -y \
-    chromium-browser \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxi6 \
-    libxtst6 \
-    libnss3 \
-    libcups2 \
-    libxss1 \
-    libxrandr2 \
-    libasound2 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libpangocairo-1.0-0 \
-    libgtk-3-0 \
-    libgbm1
+# Atualize os pacotes
+sudo apt-get update
+
+# Instale dependências necessárias
+sudo apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+
+# Adicione a chave GPG oficial do Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+# Adicione o repositório do Docker
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+# Atualize novamente e instale o Docker
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+# Instale o Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Adicione seu usuário ao grupo docker
+sudo usermod -aG docker $USER
 ```
 
-E configurar a variável de ambiente:
+### 2. Configuração Inicial
+
 ```bash
-export CHROME_BIN=/usr/bin/google-chrome-stable
+# Configure o Docker para iniciar com o sistema
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# Clone o repositório
+git clone seu-repositorio
+cd seu-repositorio
+
+# Crie as pastas necessárias
+mkdir -p nginx/conf certbot/conf certbot/www
+
+# Configure o firewall
+sudo ufw allow 80
+sudo ufw allow 443
 ```
 
-### Configuração SSL com Docker
+### 3. Configuração SSL
 
-Para configurar SSL usando Nginx e Let's Encrypt:
-
-1. Primeiro, ajuste o domínio no arquivo `nginx/conf/app.conf`:
+1. Ajuste o domínio no arquivo `nginx/conf/app.conf`:
 ```nginx
 server_name seu-dominio.com.br;
 ```
@@ -203,36 +182,99 @@ server_name seu-dominio.com.br;
 email="seu-email@example.com"
 ```
 
-3. Crie as pastas necessárias:
-```bash
-mkdir -p nginx/conf certbot/conf certbot/www
-```
-
-4. Dê permissão de execução ao script:
+3. Execute a configuração SSL:
 ```bash
 chmod +x init-letsencrypt.sh
-```
-
-5. Execute o script de inicialização:
-```bash
 ./init-letsencrypt.sh
 ```
 
-6. Inicie os containers:
+### 4. Iniciando a Aplicação
+
 ```bash
+# Construa e inicie os containers
 docker-compose up -d
+
+# Verifique o status
+docker-compose ps
+
+# Veja os logs
+docker-compose logs -f
 ```
 
-O certificado SSL será renovado automaticamente a cada 12 horas.
+### 5. Manutenção
 
-Para verificar os logs:
+#### Atualização da Aplicação
+
+Use o script `update.sh` para atualizar a aplicação:
 ```bash
-# Logs do Nginx
-docker-compose logs nginx
-
-# Logs da API
-docker-compose logs api
-
-# Logs do Certbot
-docker-compose logs certbot
+chmod +x update.sh
+./update.sh
 ```
+
+O script irá:
+- Parar os containers
+- Atualizar o código do git
+- Reconstruir as imagens
+- Reiniciar os containers
+- Limpar imagens antigas
+- Mostrar o status e logs
+
+#### Monitoramento
+
+```bash
+# Ver logs em tempo real
+docker-compose logs -f
+
+# Ver status dos containers
+docker-compose ps
+
+# Ver uso de recursos
+docker stats
+
+# Ver últimos 100 logs
+docker-compose logs --tail=100
+```
+
+#### Backup dos Certificados SSL
+
+```bash
+# Backup manual
+tar -czf ssl-backup-$(date +%Y%m%d).tar.gz certbot/conf/
+```
+
+### 6. Segurança
+
+1. Limite o acesso SSH:
+```bash
+sudo ufw allow from seu-ip to any port 22
+```
+
+2. Mantenha o sistema atualizado:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+3. Monitore os logs regularmente:
+```bash
+docker-compose logs --tail=100
+```
+
+### 7. Solução de Problemas
+
+```bash
+# Reiniciar containers
+docker-compose restart
+
+# Ver logs específicos
+docker-compose logs api
+docker-compose logs nginx
+docker-compose logs certbot
+
+# Verificar configuração do Nginx
+docker-compose exec nginx nginx -t
+
+# Recarregar configuração do Nginx
+docker-compose exec nginx nginx -s reload
+```
+
+O certificado SSL será renovado automaticamente a cada 12 horas e o Nginx será recarregado para usar o novo certificado.
