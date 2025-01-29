@@ -5,6 +5,10 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp=unconfined
     networks:
       - app-network
 

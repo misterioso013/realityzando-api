@@ -29,9 +29,9 @@ COPY . .
 # Compilar TypeScript
 RUN pnpm build
 
-# Configurar variáveis de ambiente
-ENV NODE_ENV=production
-ENV CHROME_BIN=/usr/bin/google-chrome-stable
+# Configurar variáveis de ambiente para o Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+  PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 
 # Expor porta
 EXPOSE 3000
