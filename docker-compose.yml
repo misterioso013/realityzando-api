@@ -9,6 +9,9 @@ services:
       - SYS_ADMIN
     security_opt:
       - seccomp=unconfined
+    shm_size: '1gb'
+    mem_limit: '2g'
+    memswap_limit: '2g'
     networks:
       - app-network
 
