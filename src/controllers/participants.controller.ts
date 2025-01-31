@@ -16,6 +16,7 @@ export class ParticipantsController {
   static async updateParticipants(req: Request, res: Response) {
     try {
       const scrapingService = ScrapingService.getInstance();
+      // Força uma atualização imediata
       const participants = await scrapingService.scrapeParticipants(true);
       res.json({
         participants,

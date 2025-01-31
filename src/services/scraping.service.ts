@@ -13,14 +13,36 @@ export class ScrapingService {
   private data: ParticipantsData = {
     bbb25: { participants: [], lastUpdate: new Date().toISOString() }
   };
+  private updateInterval: NodeJS.Timeout | null = null;
 
   private constructor() {
     this.ensureDataDirectory();
     // Tentar carregar dados existentes imediatamente
     this.loadFromFile().catch(() => {
-      // Se falhar, mantém os dados inicializados no default
       console.log('Nenhum dado existente encontrado, iniciando com dados vazios');
     });
+    // Iniciar o processo de atualização em background
+    this.startBackgroundUpdate();
+  }
+
+  private startBackgroundUpdate() {
+    // Primeira atualização imediata
+    this.backgroundUpdate();
+
+    // Configurar intervalo de 30 minutos
+    this.updateInterval = setInterval(() => {
+      this.backgroundUpdate();
+    }, 30 * 60 * 1000);
+  }
+
+  private async backgroundUpdate() {
+    try {
+      console.log('Iniciando atualização em background...');
+      await this.scrapeParticipants(true);
+      console.log('Atualização em background concluída');
+    } catch (error) {
+      console.error('Erro na atualização em background:', error);
+    }
   }
 
   private async ensureDataDirectory() {
@@ -363,10 +385,11 @@ export class ScrapingService {
   async getParticipants(): Promise<{
     bbb25: { participants: Participant[], lastUpdate: Date }
   }> {
+    // Sempre carrega do arquivo primeiro
     await this.loadFromFile();
 
-    if (this.data.bbb25.participants.length === 0 ||
-        this.shouldUpdate(this.data.bbb25.lastUpdate)) {
+    // Se não houver dados, faz o scraping inicial
+    if (this.data.bbb25.participants.length === 0) {
       await this.scrapeParticipants();
     }
 

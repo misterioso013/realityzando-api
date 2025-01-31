@@ -19,8 +19,8 @@ app.post('/participants/update', async (req: Request, res: Response) => {
 });
 
 // Iniciar o servidor
-app.listen(port, async () => {
+app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
-  const scrapingService = ScrapingService.getInstance();
-  await scrapingService.scrapeParticipants();
+  // Inicializar o ScrapingService
+  ScrapingService.getInstance();
 });
