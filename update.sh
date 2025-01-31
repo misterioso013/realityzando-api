@@ -1,33 +1,20 @@
 #!/bin/bash
 
-echo "Iniciando atualização..."
+# Cores para output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-# Pare os containers
-echo "Parando containers..."
-docker-compose down
-
-# Puxe as alterações do git
-echo "Atualizando código..."
+echo -e "${YELLOW}Atualizando código do repositório...${NC}"
 git pull
 
-# Reconstrua a imagem
-echo "Reconstruindo imagem..."
-docker-compose build
-
-# Inicie os containers
-echo "Iniciando containers..."
+echo -e "${YELLOW}Reconstruindo e reiniciando containers...${NC}"
+docker-compose down
+docker-compose build --no-cache
 docker-compose up -d
 
-# Limpe imagens não utilizadas
-echo "Limpando imagens antigas..."
-docker image prune -f
+echo -e "${GREEN}Processo de atualização concluído!${NC}"
 
-echo "Atualização concluída!"
-
-# Mostrar status dos containers
-echo "Status dos containers:"
-docker-compose ps
-
-# Mostrar últimos logs
-echo "Últimos logs:"
-docker-compose logs --tail=20
+# Mostrar logs do container
+echo -e "${YELLOW}Mostrando logs do container:${NC}"
+docker-compose logs -f

@@ -17,12 +17,12 @@ API para obter informações dos participantes do BBB 25, incluindo status atuai
 - Express
 - Puppeteer
 - PNPM
+- Docker
 
 ## Requisitos
 
 - Node.js 18+
 - PNPM
-- Chrome/Chromium instalado (para o Puppeteer)
 - Docker e Docker Compose instalados
 
 ## Endpoints
@@ -91,7 +91,7 @@ Exemplo de resposta:
 - `vip`: Está no VIP
 - `xepa`: Está na Xepa
 
-## Instalação e Execução
+## Instalação e Execução Local
 
 1. Clone o repositório
 2. Instale as dependências:
@@ -112,7 +112,7 @@ O servidor iniciará na porta 3000 por padrão. Você pode alterar a porta atrav
 - Você pode forçar uma atualização usando o endpoint `/participants/update`
 - Os dados são armazenados em um arquivo JSON local
 
-## Instalação em Produção
+## Instalação em Produção com Docker
 
 ### 1. Instalação do Docker e Docker Compose
 
@@ -159,33 +159,11 @@ sudo systemctl start docker
 git clone https://github.com/misterioso013/realityzando-api
 cd realityzando-api
 
-# Crie as pastas necessárias
-mkdir -p nginx/conf certbot/conf certbot/www
-
-# Configure o firewall
-sudo ufw allow 80
-sudo ufw allow 443
+# Crie a rede Docker (se ainda não existir)
+docker network create realityzando-network
 ```
 
-### 3. Configuração SSL
-
-1. Ajuste o domínio no arquivo `nginx/conf/app.conf`:
-```nginx
-server_name seu-dominio.com.br;
-```
-
-2. Ajuste o e-mail no arquivo `init-letsencrypt.sh`:
-```bash
-email="seu-email@example.com"
-```
-
-3. Execute a configuração SSL:
-```bash
-chmod +x init-letsencrypt.sh
-sudo ./init-letsencrypt.sh
-```
-
-### 4. Iniciando a Aplicação
+### 3. Iniciando a Aplicação
 
 ```bash
 # Construa e inicie os containers
@@ -198,7 +176,7 @@ docker-compose ps
 docker-compose logs -f
 ```
 
-### 5. Manutenção
+### 4. Manutenção
 
 #### Atualização da Aplicação
 
@@ -213,8 +191,7 @@ O script irá:
 - Atualizar o código do git
 - Reconstruir as imagens
 - Reiniciar os containers
-- Limpar imagens antigas
-- Mostrar o status e logs
+- Mostrar os logs em tempo real
 
 #### Monitoramento
 
@@ -232,18 +209,11 @@ docker stats
 docker-compose logs --tail=100
 ```
 
-#### Backup dos Certificados SSL
+### 5. Segurança
 
+1. Configure seu firewall:
 ```bash
-# Backup manual
-tar -czf ssl-backup-$(date +%Y%m%d).tar.gz certbot/conf/
-```
-
-### 6. Segurança
-
-1. Limite o acesso SSH:
-```bash
-sudo ufw allow from seu-ip to any port 22
+sudo ufw allow 3000
 ```
 
 2. Mantenha o sistema atualizado:
@@ -256,22 +226,19 @@ sudo apt update && sudo apt upgrade -y
 docker-compose logs --tail=100
 ```
 
-### 7. Solução de Problemas
+### 6. Solução de Problemas
 
 ```bash
-# Reiniciar containers
+# Reiniciar container
 docker-compose restart
 
-# Ver logs específicos
-docker-compose logs api
-docker-compose logs nginx
-docker-compose logs certbot
+# Ver logs
+docker-compose logs -f
 
-# Verificar configuração do Nginx
-docker-compose exec nginx nginx -t
-
-# Recarregar configuração do Nginx
-docker-compose exec nginx nginx -s reload
+# Reconstruir container
+docker-compose up -d --build
 ```
 
-O certificado SSL será renovado automaticamente a cada 12 horas e o Nginx será recarregado para usar o novo certificado.
+## Contribuição
+
+Contribuições são bem-vindas! Por favor, sinta-se à vontade para submeter pull requests.

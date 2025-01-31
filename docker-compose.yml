@@ -12,35 +12,11 @@ services:
     shm_size: '1gb'
     mem_limit: '2g'
     memswap_limit: '2g'
-    networks:
-      - app-network
-
-  nginx:
-    image: nginx:alpine
-    container_name: nginx
-    restart: always
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+      - "3000:3000"
     networks:
-      - app-network
-
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    restart: always
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    networks:
-      - app-network
+      - realityzando-network
 
 networks:
-  app-network:
-    driver: bridge
+  realityzando-network:
+    external: true
